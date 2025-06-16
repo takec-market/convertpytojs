@@ -1,10 +1,10 @@
-const initial_supply = 1_000_000_000; // 初期発行量 (GLS)
+const initial_supply = 1000000000; // 初期発行量 (GLS)
 const initial_token_price = 0.03; // 初期価格（USD）
 const final_token_price = 0.05;   // 終端価格（USD）
 const price_pattern = "random";  // 'linear', 'u', 'inverse_u', 'random'
 const annual_inflation_rate = 0.05;
 const staking_participation_rate = 0.6;
-const user_stake = 1_000_000;
+const user_stake = 1000000;
 const compound_staking = true;
 
 const distribution_ratios = {
@@ -15,7 +15,7 @@ const distribution_ratios = {
   "管理・予備費": 0.10
 };
 
-const tx_per_month = 20_000_000;
+const tx_per_month = 20000000;
 const avg_gls_per_tx = 0.021;
 const gls_to_validator_ratio = 1;
 

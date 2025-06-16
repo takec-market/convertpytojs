@@ -1,15 +1,15 @@
 // GAS version of test.js
 
 const DEFAULT_CONFIG = {
-  initial_supply: 1_000_000_000,
+  initial_supply: 1000000000,
   initial_token_price: 0.03,
   final_token_price: 0.05,
   price_pattern: "random", // 'linear', 'u', 'inverse_u', 'random'
   annual_inflation_rate: 0.05,
   staking_participation_rate: 0.6,
-  user_stake: 1_000_000,
+  user_stake: 1000000,
   compound_staking: true,
-  tx_per_month: 20_000_000,
+  tx_per_month: 20000000,
   avg_gls_per_tx: 0.021,
   gls_to_validator_ratio: 1,
   distribution_ratios: {
