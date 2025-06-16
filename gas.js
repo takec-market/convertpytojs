@@ -1,5 +1,3 @@
-// GAS version of test.js
-
 const DEFAULT_CONFIG = {
   initial_supply: 1000000000,
   initial_token_price: 0.03,
@@ -28,7 +26,7 @@ function toBool(val) {
 }
 
 function loadConfig(ss) {
-  const sheet = ss.getSheetByName('設定');
+  const sheet = ss.getSheetByName("設定");
   if (!sheet) return JSON.parse(JSON.stringify(DEFAULT_CONFIG));
 
   const data = sheet.getRange(1, 1, sheet.getLastRow(), 2).getValues();
@@ -73,7 +71,12 @@ function loadConfig(ss) {
   });
   return cfg;
 }
-
+function onOpen() {
+  const ui = SpreadsheetApp.getUi();
+  ui.createMenu('レポート')  // メニュー名（好きに変えてOK）
+    .addItem('報告書を生成', 'generateReport')  // 表示名と関数名
+    .addToUi();
+}
 function linspace(start, end, num) {
   const arr = [];
   if (num === 1) return [start];
@@ -107,7 +110,7 @@ function generateReport() {
   const gls_to_validator_ratio = cfg.gls_to_validator_ratio;
   const distribution_ratios = cfg.distribution_ratios;
 
-  const months = Array.from({length:12}, (_, i) => `${i+1}月`);
+  const months = Array.from({ length: 12 }, (_, i) => `${i + 1}月`);
   let price_curve;
   if (price_pattern === 'linear') {
     price_curve = linspace(initial_token_price, final_token_price, 12);
@@ -118,8 +121,8 @@ function generateReport() {
     const x = linspace(0, 1, 12);
     price_curve = x.map(v => initial_token_price + (final_token_price - initial_token_price) * (Math.cos(Math.PI * v)) / 2);
   } else if (price_pattern === 'random') {
-    let steps = Array.from({length:12}, () => Math.random());
-    for (let i = 1; i < steps.length; i++) steps[i] += steps[i-1];
+    let steps = Array.from({ length: 12 }, () => Math.random());
+    for (let i = 1; i < steps.length; i++) steps[i] += steps[i - 1];
     const min = Math.min(...steps);
     const max = Math.max(...steps);
     steps = steps.map(s => (s - min) / (max - min));
@@ -128,7 +131,7 @@ function generateReport() {
     price_curve = Array(12).fill(initial_token_price);
   }
 
-  const monthly_inflation = Math.pow(1 + annual_inflation_rate, 1/12) - 1;
+  const monthly_inflation = Math.pow(1 + annual_inflation_rate, 1 / 12) - 1;
   const total_annual_inflation = initial_supply * annual_inflation_rate;
   const monthly_inflation_pool = total_annual_inflation / 12;
   const total_staked = initial_supply * staking_participation_rate;
@@ -159,7 +162,7 @@ function generateReport() {
 
   const monthly_arp_inflation = monthly_rewards_inflation.map(r => (r / user_stake) * 12 * 100);
   const monthly_arp_tx = monthly_rewards_tx.map(r => (r / user_stake) * 12 * 100);
-  const total_monthly_rewards = monthly_rewards_inflation.map((r,i) => r + monthly_rewards_tx[i]);
+  const total_monthly_rewards = monthly_rewards_inflation.map((r, i) => r + monthly_rewards_tx[i]);
   const total_monthly_arp = total_monthly_rewards.map(r => (r / user_stake) * 12 * 100);
 
   const sum_rewards_inflation = round(sum(monthly_rewards_inflation), 2);
@@ -186,23 +189,23 @@ function generateReport() {
     }
     monthly_sum_gls.push(round(total, 2));
   }
-  const monthly_sum_usd = monthly_sum_gls.map((g,i) => round(g * price_curve[i], 2));
+  const monthly_sum_usd = monthly_sum_gls.map((g, i) => round(g * price_curve[i], 2));
 
   const header = ['項目', ...months, '年間合計'];
   const rows = [
-    ['個人インフレ報酬 (GLS)', ...monthly_rewards_inflation.map(r => round(r,2)), sum_rewards_inflation],
-    ['個人tx手数料報酬 (GLS)', ...monthly_rewards_tx.map(r => round(r,2)), sum_rewards_tx],
-    ['個人合計報酬 (GLS)', ...total_monthly_rewards.map(r => round(r,2)), sum_total_rewards],
-    ['個人ARP (インフレ%)', ...monthly_arp_inflation.map(r => round(r,2)), sum_arp_inflation],
-    ['個人ARP (tx手数料%)', ...monthly_arp_tx.map(r => round(r,2)), sum_arp_tx],
-    ['個人ARP (合計%)', ...total_monthly_arp.map(r => round(r,2)), sum_total_arp],
-    ['月次価格 (USD)', ...price_curve.map(p => round(p,4)), '-'],
+    ['個人インフレ報酬 (GLS)', ...monthly_rewards_inflation.map(r => round(r, 2)), sum_rewards_inflation],
+    ['個人tx手数料報酬 (GLS)', ...monthly_rewards_tx.map(r => round(r, 2)), sum_rewards_tx],
+    ['個人合計報酬 (GLS)', ...total_monthly_rewards.map(r => round(r, 2)), sum_total_rewards],
+    ['個人ARP (インフレ%)', ...monthly_arp_inflation.map(r => round(r, 2)), sum_arp_inflation],
+    ['個人ARP (tx手数料%)', ...monthly_arp_tx.map(r => round(r, 2)), sum_arp_tx],
+    ['個人ARP (合計%)', ...total_monthly_arp.map(r => round(r, 2)), sum_total_arp],
+    ['月次価格 (USD)', ...price_curve.map(p => round(p, 4)), '-'],
     Array(months.length + 2).fill('')
   ];
-  rows.push(['バリデータ全体報酬 (GLS)', ...monthly_rewards_validator_total.map(v => round(v,2)), role_totals_gls['バリデータ報酬']]);
+  rows.push(['バリデータ全体報酬 (GLS)', ...monthly_rewards_validator_total.map(v => round(v, 2)), role_totals_gls['バリデータ報酬']]);
   for (const [role, vals] of Object.entries(monthly_role_rewards)) {
     if (role === 'バリデータ報酬') continue;
-    rows.push([`${role} (GLS)`, ...vals.map(v => round(v,2)), role_totals_gls[role]]);
+    rows.push([`${role} (GLS)`, ...vals.map(v => round(v, 2)), role_totals_gls[role]]);
   }
   rows.push(['分配合計 (GLS)', ...monthly_sum_gls, round(sum(Object.values(role_totals_gls)), 2)]);
   rows.push(['分配合計 (USD)', ...monthly_sum_usd, round(sum(Object.values(role_totals_usd)), 2)]);
@@ -224,12 +227,24 @@ function generateReport() {
     ['分配設計']
   ];
   for (const [role, pct] of Object.entries(distribution_ratios)) {
-    paramsRows.push([`${role} (%):`, `${round(pct*100,2)}%`]);
+    paramsRows.push([`${role} (%):`, `${round(pct * 100, 2)}%`]);
   }
-  paramsRows.push(['']);
+  paramsRows.push(['', '']); // 空行（必ず2列）
 
   const outSheet = ss.getSheetByName('出力') || ss.insertSheet('出力');
   outSheet.clear();
-  outSheet.getRange(1,1, paramsRows.length, 2).setValues(paramsRows);
-  outSheet.getRange(paramsRows.length + 2, 1, [header, ...rows].length, header.length).setValues([header, ...rows]);
+
+  // 念のため：paramsRowsのすべての行が2列あることを保証
+  const fixedParamsRows = paramsRows.map(row => {
+    if (row.length === 2) return row;
+    if (row.length === 1) return [row[0], ''];
+    return ['', ''];
+  });
+
+  // 表データ（header + rows）を準備
+  const dataTable = [header, ...rows];
+
+  // 出力
+  outSheet.getRange(1, 1, fixedParamsRows.length, 2).setValues(fixedParamsRows);
+  outSheet.getRange(fixedParamsRows.length + 2, 1, dataTable.length, header.length).setValues(dataTable);
 }
